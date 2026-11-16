@@ -1,17 +1,15 @@
-
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_firebase/student_page.dart';
-
+import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
+import 'login_page.dart';
+import 'dashboard_page.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
-Future<void> main() async {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-
   runApp(const MyApp());
 }
 
@@ -21,54 +19,44 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      title: 'Student Information System',
       debugShowCheckedModeBanner: false,
-      title: 'Flutter Firebase App',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-        useMaterial3: true,
-      ),
-      home: StudentPage(),
-    );
-  }
-}
-
-class FirebaseHomePage extends StatelessWidget {
-  const FirebaseHomePage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Flutter Firebase'),
-        centerTitle: true,
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.cloud_done, size: 80, color: Colors.green),
-            SizedBox(height: 16),
-
-            Text(
-              'Firebase connected successfully!',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-
-             ElevatedButton(
-              onPressed:(){
-                Navigator.push(context, MaterialPageRoute(builder: (_) => StudentPage ()));
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue,
-                foregroundColor: Colors.white,
-              ),
-              child: Text("Create Student"),
-             )
-          ],
+        primarySwatch: Colors.green,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.green,
+          primary: Colors.green,
+          secondary: Colors.lightGreen,
         ),
+        scaffoldBackgroundColor: Colors.grey[100],
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Colors.green,
+          foregroundColor: Colors.white,
+          elevation: 0,
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.green,
+            foregroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+        ),
+      ),
+      home: StreamBuilder(
+        stream: FirebaseAuth.instance.authStateChanges(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Scaffold(
+              body: Center(child: CircularProgressIndicator(color: Colors.green)),
+            );
+          }
+          if (snapshot.hasData) {
+            return const DashboardPage();
+          }
+          return const LoginPage();
+        },
       ),
     );
   }
